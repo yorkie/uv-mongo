@@ -1,0 +1,21 @@
+{
+  "name": "net",
+  "version": "0.0.2",
+  "repo": "clibs/net",
+  "description": "network library for c",
+  "keywords": [
+    "network",
+    "openssl",
+    "libuv"
+  ],
+  "license": "MIT",
+  "src": [
+    "src/net.c",
+    "src/tls.c",
+    "include/net.h",
+    "include/tls.h"
+  ],
+  "dependencies": { 
+    "buffer": "*"
+  }
+}

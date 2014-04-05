@@ -1,0 +1,22 @@
+{
+  "name": "uv-mongo",
+  "version": "0.0.1",
+  "description": "open sourced async mongo library based on libuv and clibs library",
+  "keywords": [
+    "network",
+    "openssl",
+    "libuv",
+    "mongo"
+  ],
+  "license": "MIT",
+  "src": [
+    "src/mongo.c",
+    "src/bson.c",
+    "src/collection.c"
+  ],
+  "dependencies": { 
+    "buffer": "*",
+    "hash": "*",
+    "net": "*"
+  }
+}
