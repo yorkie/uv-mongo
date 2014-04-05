@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "net.h"
-#include "tls.h"
+#include "net/net.h"
+#include "net/tls.h"
+#include "hash/hash.h"
 #include "bson.h"
 #include "db.h"
 #include "collection.h"
