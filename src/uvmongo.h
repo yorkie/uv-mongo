@@ -69,6 +69,43 @@ typedef enum uvmongo_opcode_e {
   OP_KILL_CURSORS = 2007
 } uvmongo_opcode_t;
 
+/*
+ * UPDATE FLAGS TABLE
+ */
+typedef enum uvmongo_update_flags_e {
+  Upsert = 0,
+  Multi  = 1
+} uvmongo_update_flags_t;
+
+/*
+ * INSERT FLAGS TABLE
+ */
+typedef enum uvmongo_insert_flags_e {
+  ContinueOnError = 0
+} uvmongo_insert_flags_t;
+
+/*
+ * DELETE FLAGS TABLE
+ */
+typedef enum uvmongo_del_flags_e {
+  SingleRemove = 0
+} uvmongo_del_flags_t;
+
+/*
+ * QUERY FLAGS TABLE
+ * visit: http://docs.mongodb.org/meta-driver/latest/legacy/mongodb-wire-protocol/#op-query
+ */
+typedef enum uvmongo_insert_flags_e {
+  Reserved        = 0,
+  TailableCursor  = 1,
+  SlaveOk         = 2,
+  OplogReplay     = 3,
+  NoCursorTimeout = 4,
+  AwaitData       = 5,
+  Exhaust         = 6,
+  Partial         = 7
+} uvmongo_insert_flags_t;
+
 uvmongo_t *
 uvmongo_new(char * hostname, int port);
 
