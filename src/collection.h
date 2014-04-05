@@ -1,20 +1,20 @@
 
 #pragma once
 
-#include "mongo.h"
+#include "uvmongo.h"
 #include "db.h"
-#include "cursor.h"
+// #include "cursor.h"
 
-typedef mongo_collection_s {
-  mongo_db_t * db;
+typedef struct uvmongo_collection_s {
   char * name;
-} mongo_collection_t;
+  uvmongo_db_t * db;
+} uvmongo_collection_t;
 
-mongo_collection_t *
-mongo_collection_new(mongo_db_t * db, char * name);
+uvmongo_collection_t *
+uvmongo_collection_new(uvmongo_db_t * db, char * name);
 
 int
-mongo_collection_free(mongo_collection_t * coll);
+uvmongo_collection_free(uvmongo_collection_t * coll);
 
-mongo_cursor_t *
-mongo_collection_find(mongo_collection_t * coll, bson * query, bson * fields);
+// uv_cursor_t *
+// uv_collection_find(mongo_collection_t * coll, bson * query, bson * fields);

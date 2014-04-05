@@ -1,22 +1,24 @@
 
 #pragma once
 
-#include "mongo.h"
-#include "collection.h"
+#include <hash/hash.h>
+#include <uvmongo.h>
+// #include "collection.h"
 
-typedef struct mongo_db_s {
-  mongo_t * mongo;
+typedef struct uvmongo_db_s {
   char * name;
-} mongo_db_t;
+  hash_t * colls;
+  uvmongo_t * mongo;
+} uvmongo_db_t;
 
-mongo_db_t *
-mongo_db_new(mongo_t * mongo, char * name);
-
-int
-mongo_db_free(mongo_db_t * db);
-
-mongo_collection_t *
-mongo_db_get_collection(mongo_db_t * db, char * name);
+uvmongo_db_t *
+uvmongo_db_new(uvmongo_t * mongo, char * name);
 
 int
-mongo_db_auth(mongo_db_t * db, char * username, char * password);
+uvmongo_db_free(uvmongo_db_t * db);
+
+// uvmongo_collection_t *
+// uvmongo_db_get_collection(uvmongo_db_t * db, char * name);
+
+// int
+// uvmongo_db_auth(uvmongo_db_t * db, char * username, char * password);
