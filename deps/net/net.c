@@ -1,4 +1,5 @@
 
+#include <assert.h>
 #include <uv.h>
 #include "net.h"
 

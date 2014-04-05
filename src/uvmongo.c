@@ -1,6 +1,7 @@
 
 #include <assert.h>
-#include <uvmongo.h>
+#include "uvmongo.h"
+#include "message.h"
 
 uvmongo_t *
 uvmongo_new(char * hostname, int port) {
@@ -36,16 +37,49 @@ uvmongo_connect(uvmongo_t * m) {
 void
 uvmongo_on_connected(net_t * net) {
   printf("uvmongo> connected to %s:%d\n", net->hostname, net->port);
+  uvmongo_t * m = (uvmongo_t *) net->data;
+
+  /* Just for test */
+  bson query[1];
+  bson fields[1];
+  char * data;
+  char * ns = "wave-api.services";
+  int option = TailableCursor;
+  int skip = 0;
+  int limit = 0;
+
+  bson_init(query);
+  bson_append_string(query, "name", "Gmail");
+  bson_finish(query);
+  bson_init(fields);
+  bson_append_int(fields, "_id", 1);
+  bson_finish(fields);
+
+  size_t msglen = 16 + 4 + (strlen(ns)+1) + 4 + 4 + bson_size(query)+bson_size(fields);
+  uvmongo_message_t * msg = uvmongo_message_new(msglen, 0, 0, OP_QUERY);
+  data = &msg->data;
+  data = uvmongo_message_append32(data, &option);
+  data = uvmongo_message_append(data, ns, strlen(ns)+1);
+  data = uvmongo_message_append32(data, &skip);
+  data = uvmongo_message_append32(data, &limit);
+  data = uvmongo_message_append(data, query->data, bson_size(query));
+  data = uvmongo_message_append(data, fields->data, bson_size(fields));
+
+  assert(data == ((char*)msg) + msg->header.msglen);
+  uvmongo_message_send(m, msg);
 }
 
 void
 uvmongo_on_data(net_t * net, size_t read, char * buf) {
-  printf("uvmongo> received data(%zu): %s\n", read, buf);
+  printf("uvmongo> received data(%zu)\n", read);
+
+  uvmongo_t * m = (uvmongo_t *) net->data;
+  uvmongo_message_read(m, buf);
 }
 
 void
 uvmongo_on_error(net_t * net, err_t read, char * msg) {
-
+  printf("uvmongo> error: %s\n", msg);
 }
 
 int
