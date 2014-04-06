@@ -52,7 +52,6 @@ uvmongo_on_connected(net_t * net) {
   bson_append_string(query, "name", "Gmail");
   bson_finish(query);
   bson_init(fields);
-  bson_append_int(fields, "_id", 1);
   bson_finish(fields);
 
   size_t msglen = 16 + 4 + (strlen(ns)+1) + 4 + 4 + bson_size(query)+bson_size(fields);

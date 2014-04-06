@@ -77,14 +77,8 @@ uvmongo_message_read(uvmongo_t * m, char * msg) {
   unsigned int len;
 
   header = (uvmongo_header_t *) msg;
-  fields = (uvmongo_reply_fields_t *) msg+sizeof(header);
-
-
+  fields = (uvmongo_reply_fields_t *)(msg+16);
   bson_little_endian32(&len, &header->msglen);
-
-  int i;
-  for (i=0; i<header->msglen; i++)
-    printf("%d\n", msg[i]);
 
   reply = (uvmongo_reply_t *) bson_malloc(sizeof(uvmongo_reply_t) - sizeof(char) + len - 16 - 20);
   reply->header.msglen = len;
@@ -96,7 +90,7 @@ uvmongo_message_read(uvmongo_t * m, char * msg) {
   bson_little_endian32(&reply->fields.start, &fields->start);
   bson_little_endian32(&reply->fields.num, &fields->num);
 
-  reply->objs = (char*) msg+sizeof(header)+sizeof(fields);
+  reply->objs = msg+16+20;
   bson_print_raw(reply->objs, 1);
   printf("reqquest id: %d\n", reply->header.req_id);
   printf("response to: %d\n", reply->header.res_to);
