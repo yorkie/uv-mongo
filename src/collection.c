@@ -50,8 +50,6 @@ uvmongo_find(uvmongo_collection_t * coll, bson * query, bson * fields, int skip,
   } else {
     uvmongo_message_send(m, msg);
   }
-
-  
   return UVMONGO_OK;
 }
 

@@ -1,5 +1,6 @@
 
 #include <assert.h>
+#include <list/list.h>
 #include "bson.h"
 #include "uvmongo.h"
 #include "message.h"
@@ -55,6 +56,14 @@ uvmongo_checkmaster_cb(uvmongo_t * m, bson * res) {
   }
 
   printf("successfully connect to primary : %d\n", m->ismaster);
+  list_node_t * task;
+  do {
+    task = list_lpop(m->ready_queue);
+    if (task != NULL) {
+      uvmongo_message_t * msg = (uvmongo_message_t *)(task->val);
+      uvmongo_message_send(m, msg);
+    }
+  } while (task);
 }
 
 int
@@ -71,8 +80,6 @@ uvmongo_checkmaster(uvmongo_t * m) {
 void
 uvmongo_on_connected(net_t * net) {
   uvmongo_t * m = (uvmongo_t *) net->data;
-  uvmongo_checkmaster(m);
-  uvmongo_checkmaster(m);
   uvmongo_checkmaster(m);
 }
 
