@@ -10,6 +10,7 @@
 
 typedef struct uvmongo_s uvmongo_t;
 typedef void (*uvmongo_connect_cb) (uvmongo_t*);
+typedef void (*uvmongo_doc_cb)     (uvmongo_t*, bson*);
 typedef void (*uvmongo_error_cb)   (uvmongo_t*, int);
 
 struct uvmongo_s {

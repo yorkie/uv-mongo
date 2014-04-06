@@ -43,13 +43,12 @@ uvmongo_on_connected(net_t * net) {
   bson query[1];
   bson fields[1];
   char * data;
-  char * ns = "wave-api.services";
+  char * ns = "wave-api.accounts";
   int option = TailableCursor;
   int skip = 0;
   int limit = 0;
 
   bson_init(query);
-  bson_append_string(query, "name", "Gmail");
   bson_finish(query);
   bson_init(fields);
   bson_finish(fields);

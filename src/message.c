@@ -15,9 +15,9 @@ uvmongo_message_new(size_t msglen , int req_id , int res_to , int opcode) {
     req_id = rand();
   }
   message->header.msglen = (int) msglen;
-  message->header.req_id = 10;
-  message->header.res_to = 10;
-  message->header.opcode = 2004;
+  message->header.req_id = req_id;
+  message->header.res_to = res_to;
+  message->header.opcode = opcode;
   return message;
 }
 
@@ -74,7 +74,7 @@ uvmongo_message_read(uvmongo_t * m, char * msg) {
   uvmongo_header_t * header;
   uvmongo_reply_fields_t * fields;
   uvmongo_reply_t * reply;
-  unsigned int len;
+  unsigned int len, next;
 
   header = (uvmongo_header_t *) msg;
   fields = (uvmongo_reply_fields_t *)(msg+16);
@@ -91,7 +91,22 @@ uvmongo_message_read(uvmongo_t * m, char * msg) {
   bson_little_endian32(&reply->fields.num, &fields->num);
 
   reply->objs = msg+16+20;
-  bson_print_raw(reply->objs, 1);
+  next = 0;
+
+  do {
+    bson res[1];
+    bson_init_finished_data(res, reply->objs + next, 1);
+
+    if (!res) break;
+    next += bson_size(res);
+    bson_print(res);
+    printf("%d\n", next);
+
+    if (next >= reply->header.msglen - 36) {
+      break;
+    }
+  } while (next);
+
   printf("reqquest id: %d\n", reply->header.req_id);
   printf("response to: %d\n", reply->header.res_to);
   printf("opcode: %d\n", reply->header.opcode);
