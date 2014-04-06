@@ -5,7 +5,7 @@
 #include "collection.h"
 
 uvmongo_cursor_t *
-uvmongo_cursor_new(uvmongo_collection_t * coll, int64_t id);
+uvmongo_cursor_new(uvmongo_collection_t * coll);
 
 int
 uvmongo_cursor_set_query(uvmongo_cursor_t * cursor, bson * query, bson * fields);

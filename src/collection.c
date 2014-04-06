@@ -1,5 +1,6 @@
 
 #include "collection.h"
+#include "cursor.h"
 
 uvmongo_collection_t *
 uvmongo_collection_new(uvmongo_db_t * db, char * name) {
@@ -20,11 +21,16 @@ uvmongo_collection_free(uvmongo_collection_t * coll) {
 }
 
 int
-uvmongo_find(uvmongo_collection_t * coll, bson * query, bson * fields, int skip) {
+uvmongo_find(uvmongo_collection_t * coll, bson * query, bson * fields, int skip, int limit) {
+  uvmongo_cursor_t * cursor = uvmongo_cursor_new(coll);
+  uvmongo_cursor_set_query(cursor, query, fields);
+  uvmongo_cursor_set_skip(cursor, skip);
+  uvmongo_cursor_set_limit(cursor, limit);
+  uvmongo_message_serialize_query(coll->db->mongo, cursor);
   return UVMONGO_OK;
 }
 
 int
-uvmongo_findOne(uvmongo_collection_t * coll, bson * query, bson * fields) {
-  return UVMONGO_OK;
+uvmongo_find_one(uvmongo_collection_t * coll, bson * query, bson * fields) {
+  return uvmongo_find(coll, query, fields, 0, 1);
 }

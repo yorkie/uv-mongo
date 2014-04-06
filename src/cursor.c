@@ -2,9 +2,9 @@
 #include "cursor.h"
 
 uvmongo_cursor_t *
-uvmongo_cursor_new(uvmongo_collection_t * coll, int64_t id) {
+uvmongo_cursor_new(uvmongo_collection_t * coll) {
   uvmongo_cursor_t * cursor = (uvmongo_cursor_t *) malloc(sizeof(uvmongo_cursor_t));
-  cursor->id = id;
+  cursor->coll = coll;
   return cursor;
 }
 

@@ -12,7 +12,7 @@ int
 uvmongo_collection_free(uvmongo_collection_t * coll);
 
 int
-uvmongo_find(uvmongo_collection_t * coll, bson * query, bson * fields, int skip);
+uvmongo_find(uvmongo_collection_t * coll, bson * query, bson * fields, int skip, int limit);
 
 int
-uvmongo_findOne(uvmongo_collection_t * coll, bson * query, bson * fields);
+uvmongo_find_one(uvmongo_collection_t * coll, bson * query, bson * fields);

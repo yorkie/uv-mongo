@@ -143,12 +143,12 @@ uvmongo_message_read(uvmongo_t * m, char * msg, uvmongo_doc_cb doc_cb) {
     }
   } while (next);
 
-  // printf("reqquest id: %d\n", reply->header.req_id);
-  // printf("response to: %d\n", reply->header.res_to);
-  // printf("opcode: %d\n", reply->header.opcode);
-  // printf("flag: %d\n", reply->fields.flag);
-  // printf("cursorID: %lld\n", reply->fields.cursorID);
-  // printf("start: %d\n", reply->fields.start);
-  // printf("number: %d\n", reply->fields.num);
+  printf("reqquest id: %d\n", reply->header.req_id);
+  printf("response to: %d\n", reply->header.res_to);
+  printf("opcode: %d\n", reply->header.opcode);
+  printf("flag: %d\n", reply->fields.flag);
+  printf("cursorID: %lld\n", reply->fields.cursorID);
+  printf("start: %d\n", reply->fields.start);
+  printf("number: %d\n", reply->fields.num);
   return 1;
 }
