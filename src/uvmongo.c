@@ -72,6 +72,8 @@ void
 uvmongo_on_connected(net_t * net) {
   uvmongo_t * m = (uvmongo_t *) net->data;
   uvmongo_checkmaster(m);
+  uvmongo_checkmaster(m);
+  uvmongo_checkmaster(m);
 }
 
 void

@@ -1,8 +1,11 @@
 
+#include <math.h>
 #include <assert.h>
 #include <net/net.h>
 #include "bson.h"
 #include "message.h"
+
+#define Length(num) num == 0 ? 1 : (int)log10((int)num)+2;
 
 uvmongo_message_t *
 uvmongo_message_new(size_t msglen , int req_id , int res_to , int opcode) {
@@ -109,8 +112,10 @@ uvmongo_message_send(uvmongo_t * m, uvmongo_message_t * message) {
     return r;
   }
 
-  hash_set();
-  list_rpush(m->msgs, list_node_new(message));
+  int msg_name_len = Length(header.req_id);
+  char * msg_name = malloc(msg_name_len);
+  snprintf(msg_name, msg_name_len, "%d", header.req_id);
+  hash_set(m->msgs, msg_name, message);
   return UVMONGO_OK;
 }
 
@@ -138,12 +143,16 @@ uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
 
   reply->objs = msg+16+20;
   next = 0;
-  message = (uvmongo_message_t *)(list_lpop(m->msgs)->val);
+  
+  int msg_name_len = Length(reply->header.res_to);
+  char msg_name[msg_name_len];
+  snprintf(msg_name, sizeof(msg_name), "%d", reply->header.res_to);
+  message = (uvmongo_message_t *)(hash_get(m->msgs, msg_name));
+  if (message == NULL) {
+    fprintf(stderr, "could not found request id: %s", msg_name);
+    return UVMONGO_ERROR;
+  }
 
-  /*
-   * RequestId(client) == ResponseTo(server): True
-   */
-  assert(message->header.req_id == reply->header.res_to);
   do {
     bson res[1];
     bson_init_finished_data(res, reply->objs + next, 1);
@@ -157,6 +166,10 @@ uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
     }
   } while (next);
 
+  /* 
+   * check the buffer size is bigger than reply length,
+   * that means multiple replies has been received.
+   */
   if (buflen > reply->header.msglen) {
     uvmongo_message_read(m, msg + reply->header.msglen, buflen - reply->header.msglen);
   }
