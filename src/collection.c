@@ -1,5 +1,6 @@
 
 #include "collection.h"
+#include "message.h"
 #include "cursor.h"
 
 uvmongo_collection_t *
@@ -21,16 +22,19 @@ uvmongo_collection_free(uvmongo_collection_t * coll) {
 }
 
 int
-uvmongo_find(uvmongo_collection_t * coll, bson * query, bson * fields, int skip, int limit) {
+uvmongo_find(uvmongo_collection_t * coll, bson * query, bson * fields, int skip, int limit, uvmongo_document_cb callback) {
   uvmongo_cursor_t * cursor = uvmongo_cursor_new(coll);
   uvmongo_cursor_set_query(cursor, query, fields);
   uvmongo_cursor_set_skip(cursor, skip);
   uvmongo_cursor_set_limit(cursor, limit);
-  uvmongo_message_serialize_query(coll->db->mongo, cursor);
+  
+  uvmongo_message_t * msg = uvmongo_message_serialize_query(cursor);
+  uvmongo_message_set_callback(msg, callback);
+  uvmongo_message_send(coll->db->mongo, msg);
   return UVMONGO_OK;
 }
 
 int
-uvmongo_find_one(uvmongo_collection_t * coll, bson * query, bson * fields) {
-  return uvmongo_find(coll, query, fields, 0, 1);
+uvmongo_find_one(uvmongo_collection_t * coll, bson * query, bson * fields, uvmongo_document_cb callback) {
+  return uvmongo_find(coll, query, fields, 0, 1, callback);
 }

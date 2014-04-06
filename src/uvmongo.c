@@ -10,6 +10,7 @@ uvmongo_new(char * hostname, int port) {
   uvmongo_t * m = (uvmongo_t *) malloc(sizeof(uvmongo_t));
   m->net = net_new(hostname, port);
   m->dbs = hash_new();
+  m->msgs = list_new();
 
   /*
    * init net
@@ -37,22 +38,24 @@ uvmongo_connect(uvmongo_t * m) {
 }
 
 void
+uvmongo_read_test(uvmongo_t * m, bson * doc) {
+  bson_print(doc);
+}
+
+void
 uvmongo_on_connected(net_t * net) {
   printf("uvmongo> connected to %s:%d\n", net->hostname, net->port);
   uvmongo_t * m = (uvmongo_t *) net->data;
   uvmongo_collection_t * cmds = uvmongo_collection(uvmongo_db(m, "admin"), "$cmd");
 
-
-  /* Just for test */
   bson query[1];
   bson fields[1];
-
   bson_init(query);
   bson_append_int(query, "ismaster", 1);
   bson_finish(query);
   bson_init(fields);
   bson_finish(fields);
-  uvmongo_find_one(cmds, query, fields);
+  uvmongo_find_one(cmds, query, fields, uvmongo_read_test);
 }
 
 void
@@ -63,9 +66,9 @@ uvmongo_read_document(uvmongo_t * m, bson * doc) {
 
 void
 uvmongo_on_data(net_t * net, size_t read, char * buf) {
-  printf("uvmongo> received data(%zu)\n", read);
   uvmongo_t * m = (uvmongo_t *) net->data;
-  uvmongo_message_read(m, buf, uvmongo_read_document);
+  printf("uvmongo> received data(%zu)\n", read);
+  uvmongo_message_read(m, buf);
 }
 
 void

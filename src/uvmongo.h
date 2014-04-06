@@ -5,14 +5,15 @@
 #define UVMONGO_ERROR   -1
 
 #include <net/net.h>
+#include <list/list.h>
 #include <hash/hash.h>
 #include <buffer/buffer.h>
 #include "bson.h"
 
 typedef struct uvmongo_s uvmongo_t;
-typedef void (*uvmongo_connect_cb) (uvmongo_t*);
-typedef void (*uvmongo_doc_cb)     (uvmongo_t*, bson*);
-typedef void (*uvmongo_error_cb)   (uvmongo_t*, int);
+typedef void (*uvmongo_connect_cb)  (uvmongo_t*);
+typedef void (*uvmongo_document_cb) (uvmongo_t*, bson*);
+typedef void (*uvmongo_error_cb)    (uvmongo_t*, int);
 
 /*
  * OPCODE TABLE
@@ -78,6 +79,7 @@ typedef enum uvmongo_query_flags_e {
 struct uvmongo_s {
   hash_t * dbs;
   hash_t * colls;
+  list_t * msgs;
   net_t * net;
   uvmongo_connect_cb connect_cb;
   uvmongo_error_cb error_cb;
@@ -133,6 +135,7 @@ typedef struct uvmongo_header_s {
  * message structure
  */
 typedef struct uvmongo_message_s {
+  uvmongo_document_cb callback;
   uvmongo_header_t header;
   char data;
 } uvmongo_message_t;

@@ -21,6 +21,12 @@ uvmongo_message_new(size_t msglen , int req_id , int res_to , int opcode) {
   return message;
 }
 
+int
+uvmongo_message_set_callback(uvmongo_message_t * msg, uvmongo_document_cb callback) {
+  msg->callback = callback;
+  return UVMONGO_OK;
+}
+
 char *
 uvmongo_message_append(char * start, const void * data , size_t len) {
   memcpy(start, data, len);
@@ -39,8 +45,8 @@ uvmongo_message_append64(char * start , const void * data) {
   return start + 8;
 }
 
-int
-uvmongo_message_serialize_query(uvmongo_t * m, uvmongo_cursor_t * cursor) {
+uvmongo_message_t *
+uvmongo_message_serialize_query(uvmongo_cursor_t * cursor) {
   char * data;
   char * ns = buffer_string(cursor->coll->fullname);
   size_t nslen = strlen(ns) + 1;
@@ -56,23 +62,23 @@ uvmongo_message_serialize_query(uvmongo_t * m, uvmongo_cursor_t * cursor) {
   data = uvmongo_message_append(data, cursor->query->data, bson_size(cursor->query));
   data = uvmongo_message_append(data, cursor->fields->data, bson_size(cursor->fields));
 
-  assert(data == ((char*)msg) + msg->header.msglen);
-  return uvmongo_message_send(m, msg);
+  assert(data == ((char*)msg) + sizeof(uvmongo_document_cb) + msg->header.msglen);
+  return msg;
 }
 
-int
-uvmongo_message_serialize_delete(uvmongo_t * m, bson * query) {
-  return UVMONGO_OK;
+uvmongo_message_t *
+uvmongo_message_serialize_delete(bson * query) {
+  return NULL;
 }
 
-int
-uvmongo_message_serialize_update(uvmongo_t * m, bson * query, bson * setup) {
-  return UVMONGO_OK;
+uvmongo_message_t *
+uvmongo_message_serialize_update(bson * query, bson * setup) {
+  return NULL;
 }
 
-int
-uvmongo_message_serialize_insert(uvmongo_t * m, bson * obj) {
-  return UVMONGO_OK;
+uvmongo_message_t *
+uvmongo_message_serialize_insert(bson * obj) {
+  return NULL;
 }
 
 int
@@ -101,13 +107,14 @@ uvmongo_message_send(uvmongo_t * m, uvmongo_message_t * message) {
     return r;
   }
 
-  bson_free(message);
+  list_rpush(m->msgs, list_node_new(message));
   return UVMONGO_OK;
 }
 
 int
-uvmongo_message_read(uvmongo_t * m, char * msg, uvmongo_doc_cb doc_cb) {
+uvmongo_message_read(uvmongo_t * m, char * msg) {
   uvmongo_header_t * header;
+  uvmongo_message_t * message;
   uvmongo_reply_fields_t * fields;
   uvmongo_reply_t * reply;
   unsigned int len, next;
@@ -128,16 +135,20 @@ uvmongo_message_read(uvmongo_t * m, char * msg, uvmongo_doc_cb doc_cb) {
 
   reply->objs = msg+16+20;
   next = 0;
+  message = (uvmongo_message_t *)(list_lpop(m->msgs)->val);
 
+  /*
+   * RequestId(client) == ResponseTo(server): True
+   */
+  assert(message->header.req_id == reply->header.res_to);
   do {
     bson res[1];
     bson_init_finished_data(res, reply->objs + next, 1);
-
-    if (!res) break;
-    next += bson_size(res);
-    if (doc_cb) { 
-      doc_cb(m, res); 
+    if (!res) {
+      break;
     }
+    message->callback(m, res);
+    next += bson_size(res);
     if (next >= reply->header.msglen - 36) {
       break;
     }
@@ -150,5 +161,5 @@ uvmongo_message_read(uvmongo_t * m, char * msg, uvmongo_doc_cb doc_cb) {
   printf("cursorID: %lld\n", reply->fields.cursorID);
   printf("start: %d\n", reply->fields.start);
   printf("number: %d\n", reply->fields.num);
-  return 1;
+  return UVMONGO_OK;
 }
