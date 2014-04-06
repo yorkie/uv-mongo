@@ -81,7 +81,7 @@ struct uvmongo_s {
   int connected;
   hash_t * dbs;
   hash_t * colls;
-  list_t * msgs;
+  hash_t * msgs;
   list_t * ready_queue;
   net_t * net;
   uvmongo_connect_cb connect_cb;

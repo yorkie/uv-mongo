@@ -21,7 +21,7 @@ main(int argc, char ** argv) {
   bson_finish(query);
   bson_init(fields);
   bson_finish(fields);
-  uvmongo_find_one(accounts, query, fields, find_cb);
+  // uvmongo_find_one(accounts, query, fields, find_cb);
   uv_run(uv_default_loop(), UV_RUN_DEFAULT);
   return 0;
 }

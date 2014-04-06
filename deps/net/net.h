@@ -33,7 +33,6 @@ typedef uv_err_t err_t;
   uv_getaddrinfo_t *resolver;         \
   uv_loop_t        *loop;             \
   uv_tcp_t         *handle;           \
-  uv_write_t       *writer;           \
   uv_connect_t     *conn;             \
 
 

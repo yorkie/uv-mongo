@@ -10,7 +10,7 @@ uvmongo_new(char * hostname, int port) {
   uvmongo_t * m = (uvmongo_t *) malloc(sizeof(uvmongo_t));
   m->net = net_new(hostname, port);
   m->dbs = hash_new();
-  m->msgs = list_new();
+  m->msgs = hash_new();
   m->ready_queue = list_new();
   m->ismaster = -1;
   m->connected = -1;
@@ -59,16 +59,13 @@ uvmongo_checkmaster_cb(uvmongo_t * m, bson * res) {
 
 int
 uvmongo_checkmaster(uvmongo_t * m) {
-  bson query[1], fields[1];
   uvmongo_collection_t * cmds = uvmongo_collection(uvmongo_db(m, "admin"), "$cmd");
+  bson * query = bson_alloc();
   bson_init(query);
   bson_append_int(query, "ismaster", 1);
   bson_finish(query);
-  bson_init(fields);
-  bson_finish(fields);
-  uvmongo__find(cmds, query, fields, 0, 1, uvmongo_checkmaster_cb);
-  bson_destroy(query);
-  bson_destroy(fields);
+  uvmongo__find(cmds, query, NULL, 0, 1, uvmongo_checkmaster_cb);
+  bson_free(query);
 }
 
 void
@@ -79,8 +76,9 @@ uvmongo_on_connected(net_t * net) {
 
 void
 uvmongo_on_data(net_t * net, size_t read, char * buf) {
+  printf("received data(%zu)\n", read);
   uvmongo_t * m = (uvmongo_t *) net->data;
-  uvmongo_message_read(m, buf);
+  uvmongo_message_read(m, buf, read);
   net_resume(net);
 }
 

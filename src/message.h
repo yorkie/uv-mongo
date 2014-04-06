@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <string.h>
 #include "uvmongo.h"
 
 uvmongo_message_t *
@@ -34,5 +35,4 @@ int
 uvmongo_message_send(uvmongo_t * m, uvmongo_message_t * message);
 
 int
-uvmongo_message_read(uvmongo_t * m, char * msg);
-
+uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen);

@@ -60,7 +60,9 @@ uvmongo_message_serialize_query(uvmongo_cursor_t * cursor) {
   data = uvmongo_message_append32(data, &cursor->skip);
   data = uvmongo_message_append32(data, &cursor->limit);
   data = uvmongo_message_append(data, cursor->query->data, bson_size(cursor->query));
-  data = uvmongo_message_append(data, cursor->fields->data, bson_size(cursor->fields));
+  if (cursor->fields) {
+    data = uvmongo_message_append(data, cursor->fields->data, bson_size(cursor->fields));
+  }
 
   assert(data == ((char*)msg) + sizeof(uvmongo_document_cb) + msg->header.msglen);
   return msg;
@@ -107,12 +109,13 @@ uvmongo_message_send(uvmongo_t * m, uvmongo_message_t * message) {
     return r;
   }
 
+  hash_set();
   list_rpush(m->msgs, list_node_new(message));
   return UVMONGO_OK;
 }
 
 int
-uvmongo_message_read(uvmongo_t * m, char * msg) {
+uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
   uvmongo_header_t * header;
   uvmongo_message_t * message;
   uvmongo_reply_fields_t * fields;
@@ -154,12 +157,8 @@ uvmongo_message_read(uvmongo_t * m, char * msg) {
     }
   } while (next);
 
-  // printf("reqquest id: %d\n", reply->header.req_id);
-  // printf("response to: %d\n", reply->header.res_to);
-  // printf("opcode: %d\n", reply->header.opcode);
-  // printf("flag: %d\n", reply->fields.flag);
-  // printf("cursorID: %lld\n", reply->fields.cursorID);
-  // printf("start: %d\n", reply->fields.start);
-  // printf("number: %d\n", reply->fields.num);
+  if (buflen > reply->header.msglen) {
+    uvmongo_message_read(m, msg + reply->header.msglen, buflen - reply->header.msglen);
+  }
   return UVMONGO_OK;
 }

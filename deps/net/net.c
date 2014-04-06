@@ -16,10 +16,8 @@ net_new(char * hostname, int port) {
   net->error_cb = NULL;
   net->close_cb = NULL;
   net->handle = (uv_tcp_t *) malloc(sizeof(uv_tcp_t));
-  net->writer = (uv_write_t *) malloc(sizeof(uv_write_t));
   net->conn   = (uv_connect_t *) malloc(sizeof(uv_connect_t));
   net->handle->data
-    = net->writer->data
     = net->conn->data
     = (void *) net;
 
@@ -68,10 +66,6 @@ net_free_cb(uv_handle_t * handle) {
   if (net->handle != NULL) {
     free(net->handle);
     net->handle = NULL;
-  }
-  if (net->writer != NULL) {
-    free(net->writer);
-    net->writer = NULL;
   }
   if (net->conn != NULL) {
     free(net->conn);
@@ -200,8 +194,9 @@ net_connect_cb(uv_connect_t *conn, int stat) {
     do {
       read = tls_bio_read(net->tls, 0);
       if (read > 0) {
+        uv_write_t req;
         uv_buf_t uvbuf = uv_buf_init(net->tls->buf, read);
-        uv_write(net->writer, (uv_stream_t*)net->handle, &uvbuf, 1, NULL);
+        uv_write(&req, (uv_stream_t*)net->handle, &uvbuf, 1, NULL);
       }
     } while (read > 0);
   }
@@ -251,8 +246,9 @@ net_read(uv_stream_t *handle, ssize_t nread, const uv_buf_t buf) {
       do {
         read = tls_bio_read(net->tls, 0);
         if (read > 0) {
+          uv_write_t req;
           uv_buf_t uvbuf = uv_buf_init(net->tls->buf, read);
-          uv_write(net->writer, (uv_stream_t*)net->handle, &uvbuf, 1, NULL);
+          uv_write(&req, (uv_stream_t*)net->handle, &uvbuf, 1, NULL);
         }
       } while (read > 0);
 
@@ -302,8 +298,11 @@ net_write(net_t * net, char * buf) {
 
 int
 net_write2(net_t * net, char * buf, unsigned int len) {
+  uv_write_t * req;
   uv_buf_t uvbuf;
   int read = 0;
+  req = (uv_write_t *) malloc(sizeof(uv_write_t));
+  req->data = net;
 
   switch (net->use_ssl) {
   case USE_SSL:
@@ -312,7 +311,7 @@ net_write2(net_t * net, char * buf, unsigned int len) {
       read = tls_bio_read(net->tls, 0);
       if (read > 0) {
         uvbuf = uv_buf_init(net->tls->buf, read);
-        uv_write(net->writer, (uv_stream_t*)net->handle,
+        uv_write(req, (uv_stream_t*)net->handle,
                               &uvbuf,
                               1,
                               net_write_cb);
@@ -322,7 +321,7 @@ net_write2(net_t * net, char * buf, unsigned int len) {
 
   case NOT_SSL:
     uvbuf = uv_buf_init(buf, len);
-    uv_write(net->writer, (uv_stream_t*)net->handle,
+    uv_write(req, (uv_stream_t*)net->handle,
                           &uvbuf,
                           1,
                           net_write_cb);
@@ -350,7 +349,8 @@ net_set_error_cb(net_t * net, void * cb) {
 }
 
 void
-net_write_cb(uv_write_t *writer, int stat) {
-  net_t * net = (net_t *) writer->data;
+net_write_cb(uv_write_t *req, int stat) {
+  net_t * net = (net_t *) req->data;
+  free(req);
   net_resume(net);
 }
