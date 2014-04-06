@@ -40,6 +40,42 @@ uvmongo_message_append64(char * start , const void * data) {
 }
 
 int
+uvmongo_message_serialize_query(uvmongo_t * m, uvmongo_cursor_t * cursor) {
+  char * data;
+  char * ns = buffer_string(cursor->coll->fullname);
+  size_t nslen = strlen(ns) + 1;
+  size_t bslen = bson_size(cursor->query) + bson_size(cursor->fields);
+  size_t msglen = 16 + 4 + nslen + 4 + 4 + bslen;
+  uvmongo_message_t * msg = uvmongo_message_new(msglen, 0, 0, OP_QUERY);
+  
+  data = &msg->data;
+  data = uvmongo_message_append32(data, &cursor->flag);
+  data = uvmongo_message_append(data, ns, nslen);
+  data = uvmongo_message_append32(data, &cursor->skip);
+  data = uvmongo_message_append32(data, &cursor->limit);
+  data = uvmongo_message_append(data, cursor->query->data, bson_size(cursor->query));
+  data = uvmongo_message_append(data, cursor->fields->data, bson_size(cursor->fields));
+
+  assert(data == ((char*)msg) + msg->header.msglen);
+  return uvmongo_message_send(m, msg);
+}
+
+int
+uvmongo_message_serialize_delete(uvmongo_t * m, bson * query) {
+  return UVMONGO_OK;
+}
+
+int
+uvmongo_message_serialize_update(uvmongo_t * m, bson * query, bson * setup) {
+  return UVMONGO_OK;
+}
+
+int
+uvmongo_message_serialize_insert(uvmongo_t * m, bson * obj) {
+  return UVMONGO_OK;
+}
+
+int
 uvmongo_message_send(uvmongo_t * m, uvmongo_message_t * message) {
   uvmongo_header_t header;
   int r, i = 0;
@@ -70,7 +106,7 @@ uvmongo_message_send(uvmongo_t * m, uvmongo_message_t * message) {
 }
 
 int
-uvmongo_message_read(uvmongo_t * m, char * msg) {
+uvmongo_message_read(uvmongo_t * m, char * msg, uvmongo_doc_cb doc_cb) {
   uvmongo_header_t * header;
   uvmongo_reply_fields_t * fields;
   uvmongo_reply_t * reply;
@@ -99,20 +135,20 @@ uvmongo_message_read(uvmongo_t * m, char * msg) {
 
     if (!res) break;
     next += bson_size(res);
-    bson_print(res);
-    printf("%d\n", next);
-
+    if (doc_cb) { 
+      doc_cb(m, res); 
+    }
     if (next >= reply->header.msglen - 36) {
       break;
     }
   } while (next);
 
-  printf("reqquest id: %d\n", reply->header.req_id);
-  printf("response to: %d\n", reply->header.res_to);
-  printf("opcode: %d\n", reply->header.opcode);
-  printf("flag: %d\n", reply->fields.flag);
-  printf("cursorID: %lld\n", reply->fields.cursorID);
-  printf("start: %d\n", reply->fields.start);
-  printf("number: %d\n", reply->fields.num);
+  // printf("reqquest id: %d\n", reply->header.req_id);
+  // printf("response to: %d\n", reply->header.res_to);
+  // printf("opcode: %d\n", reply->header.opcode);
+  // printf("flag: %d\n", reply->fields.flag);
+  // printf("cursorID: %lld\n", reply->fields.cursorID);
+  // printf("start: %d\n", reply->fields.start);
+  // printf("number: %d\n", reply->fields.num);
   return 1;
 }
