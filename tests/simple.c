@@ -6,13 +6,22 @@
 #include "db.h"
 #include "collection.h"
 
+void
+find_cb(uvmongo_t * m, bson * res) {
+  bson_print(res);
+}
+
 int
 main(int argc, char ** argv) {
   uvmongo_t * m = uvmongo_new("localhost", 27017);
-  // uvmongo_db_t * mydb = uvmongo_db(m, "wave-api");
-  // uvmongo_collection_t * accounts = uvmongo_collection(mydb, "accounts");
-  // printf("%s\n", mydb->name->data);
-  // printf("%s\n", accounts->fullname->data);
+  uvmongo_db_t * mydb = uvmongo_db(m, "wave-api");
+  uvmongo_collection_t * accounts = uvmongo_collection(mydb, "accounts");
+  bson query[1], fields[1];
+  bson_init(query);
+  bson_finish(query);
+  bson_init(fields);
+  bson_finish(fields);
+  uvmongo_find_one(accounts, query, fields, find_cb);
   uv_run(uv_default_loop(), UV_RUN_DEFAULT);
   return 0;
 }

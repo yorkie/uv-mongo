@@ -77,9 +77,12 @@ typedef enum uvmongo_query_flags_e {
 } uvmongo_query_flags_t;
 
 struct uvmongo_s {
+  int ismaster;
+  int connected;
   hash_t * dbs;
   hash_t * colls;
   list_t * msgs;
+  list_t * ready_queue;
   net_t * net;
   uvmongo_connect_cb connect_cb;
   uvmongo_error_cb error_cb;
@@ -167,6 +170,12 @@ uvmongo_free(uvmongo_t * m);
 
 int
 uvmongo_connect(uvmongo_t * m);
+
+int
+uvmongo_checkmaster(uvmongo_t * m);
+
+void
+uvmongo_checkmaster_cb(uvmongo_t * m, bson * res);
 
 void
 uvmongo_on_connected(net_t * net);
