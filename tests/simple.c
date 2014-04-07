@@ -13,7 +13,7 @@ find_cb(uvmongo_t * m, bson * res) {
 
 int
 main(int argc, char ** argv) {
-  uvmongo_t * m = uvmongo_new("localhost", 27017);
+  uvmongo_t * m = uvmongo_connect("localhost", 27017);
   uvmongo_db_t * mydb = uvmongo_db(m, "wave-api");
   uvmongo_collection_t * accounts = uvmongo_collection(mydb, "accounts");
   bson query[1];

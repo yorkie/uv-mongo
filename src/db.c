@@ -31,7 +31,7 @@ uvmongo_collection(uvmongo_db_t * db, char * name) {
   return ret;
 }
 
-// int
-// uvmongo_db_auth(uvmongo_db_t * db, char * username, char * password) {
-
-// }
+int
+uvmongo_db_auth(uvmongo_db_t * db, char * username, char * password) {
+  return UVMONGO_OK;
+}

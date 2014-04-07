@@ -166,13 +166,13 @@ typedef struct uvmongo_reply_s {
 #pragma pack()
 
 uvmongo_t *
-uvmongo_new(char * hostname, int port);
+uvmongo_connect(char * hostname, int port);
 
 int
-uvmongo_free(uvmongo_t * m);
+uvmongo_close(uvmongo_t * m);
 
 int
-uvmongo_connect(uvmongo_t * m);
+uvmongo_run_command(uvmongo_t * m, bson * cmd, uvmongo_document_cb callback);
 
 int
 uvmongo_checkmaster(uvmongo_t * m);

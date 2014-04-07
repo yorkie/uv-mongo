@@ -30,8 +30,11 @@ main(int argc, char ** argv) {
 
 
 ### API
-##### uvmongo_new(char * hostname, int port);
+##### uvmongo_connect(char * hostname, int port);
 create a connection to your mongoDB
+
+##### uvmongo_close(uvmongo_t * m);
+close this connection to your mongoDB
 
 ##### uvmongo_db(uvmongo_t * m, char * name);
 select db in your mongoDB
@@ -44,7 +47,6 @@ query documents
 
 ##### uvmongo_find_one(uvmongo_collection_t * coll, bson * query, bson * field, void * callback);
 query one document
-
 
 ### Run tests
 ```sh

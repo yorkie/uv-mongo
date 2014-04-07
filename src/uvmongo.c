@@ -5,9 +5,10 @@
 #include "uvmongo.h"
 #include "message.h"
 #include "db.h"
+#include "collection.h"
 
 uvmongo_t *
-uvmongo_new(char * hostname, int port) {
+uvmongo_connect(char * hostname, int port) {
   uvmongo_t * m = (uvmongo_t *) malloc(sizeof(uvmongo_t));
   m->net = net_new(hostname, port);
   m->dbs = hash_new();
@@ -23,12 +24,12 @@ uvmongo_new(char * hostname, int port) {
   m->net->read_cb = uvmongo_on_data;
   m->net->error_cb = uvmongo_on_error;
   m->net->data = m;
-  uvmongo_connect(m);
+  net_connect(m->net);
   return m;
 }
 
 int
-uvmongo_free(uvmongo_t * m) {
+uvmongo_close(uvmongo_t * m) {
   net_free(m->net);
   free(m);
   m = NULL;
@@ -36,9 +37,21 @@ uvmongo_free(uvmongo_t * m) {
 }
 
 int
-uvmongo_connect(uvmongo_t * m) {
-  assert(m->net != NULL);
-  return net_connect(m->net);
+uvmongo_run_command(uvmongo_t * m, bson * cmd, uvmongo_document_cb callback) {
+  uvmongo_collection_t * cmds = uvmongo_collection(uvmongo_db(m, "admin"), "$cmd");
+  uvmongo__find(cmds, cmd, NULL, 0, 1, callback);
+  return UVMONGO_OK;
+}
+
+int
+uvmongo_checkmaster(uvmongo_t * m) {
+  bson * cmd = bson_alloc();
+  bson_init(cmd);
+  bson_append_int(cmd, "ismaster", 1);
+  bson_finish(cmd);
+  uvmongo_run_command(m, cmd, uvmongo_checkmaster_cb);
+  bson_free(cmd);
+  return UVMONGO_OK;
 }
 
 void
@@ -47,7 +60,7 @@ uvmongo_checkmaster_cb(uvmongo_t * m, bson * res) {
   char *key;
   bson_iterator_from_buffer(&it, res->data);
   while (bson_iterator_next(&it)) {
-    key = bson_iterator_key(&it);
+    key = (char *) bson_iterator_key(&it);
     if (strcmp("ismaster", key) == 0) {
       m->ismaster = bson_iterator_bool(&it);
       m->connected = UVMONGO_OK;
@@ -64,17 +77,6 @@ uvmongo_checkmaster_cb(uvmongo_t * m, bson * res) {
       uvmongo_message_send(m, msg);
     }
   } while (task);
-}
-
-int
-uvmongo_checkmaster(uvmongo_t * m) {
-  uvmongo_collection_t * cmds = uvmongo_collection(uvmongo_db(m, "admin"), "$cmd");
-  bson * query = bson_alloc();
-  bson_init(query);
-  bson_append_int(query, "ismaster", 1);
-  bson_finish(query);
-  uvmongo__find(cmds, query, NULL, 0, 1, uvmongo_checkmaster_cb);
-  bson_free(query);
 }
 
 void
