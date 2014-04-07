@@ -139,6 +139,7 @@ typedef struct uvmongo_header_s {
  */
 typedef struct uvmongo_message_s {
   uvmongo_document_cb callback;
+  uvmongo_cursor_t * cursor;
   uvmongo_header_t header;
   char data;
 } uvmongo_message_t;
