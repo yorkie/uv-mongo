@@ -8,7 +8,7 @@
 
 void
 find_cb(uvmongo_t * m, bson * res) {
-  //bson_print(res);
+  bson_print(res);
 }
 
 int
@@ -19,8 +19,7 @@ main(int argc, char ** argv) {
   bson query[1];
   bson_init(query);
   bson_finish(query);
-  uvmongo_find(accounts, query, NULL, 0, 2, find_cb);
-  
+  uvmongo_find(accounts, query, NULL, 0, 0, find_cb);
   uv_run(uv_default_loop(), UV_RUN_DEFAULT);
   return 0;
 }

@@ -8,6 +8,9 @@ uvmongo_cursor_t *
 uvmongo_cursor_new(uvmongo_collection_t * coll);
 
 int
+uvmongo_cursor_set_id(uvmongo_cursor_t * cursor, int64_t id);
+
+int
 uvmongo_cursor_set_query(uvmongo_cursor_t * cursor, bson * query, bson * fields);
 
 int

@@ -5,8 +5,16 @@ uvmongo_cursor_t *
 uvmongo_cursor_new(uvmongo_collection_t * coll) {
   uvmongo_cursor_t * cursor = (uvmongo_cursor_t *) malloc(sizeof(uvmongo_cursor_t));
   cursor->coll = coll;
-  cursor->flag = NoCursorTimeout;
+  cursor->flag = 0;
+  cursor->skip = 0;
+  cursor->limit = 0;
   return cursor;
+}
+
+int
+uvmongo_cursor_set_id(uvmongo_cursor_t * cursor, int64_t id) {
+  cursor->id = id;
+  return UVMONGO_OK;
 }
 
 int
