@@ -1,8 +1,7 @@
 
 uv mongo
 ================
-
-open sourced async mongo library based on libuv and clibs library
+Async mongo library based on [libuv](https://github.com/joyent/libuv) and [clibs](https://github.com/clibs)
 
 ### Usage
 ```c
