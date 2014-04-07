@@ -73,6 +73,12 @@ uvmongo_message_t *
 uvmongo_message_serialize_insert(buffer_t * fullname, bson * obj);
 
 /*
+ * serialize OP_KILL_CURSORS
+ */
+uvmongo_message_t *
+uvmongo_message_serialize_killCursors(uvmongo_t * m);
+
+/*
  * send message abstraction
  */
 int

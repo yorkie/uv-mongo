@@ -144,6 +144,7 @@ typedef struct uvmongo_message_s {
   char data;
 } uvmongo_message_t;
 
+#pragma pack(1)
 /*
  * replay response
  */
@@ -162,6 +163,7 @@ typedef struct uvmongo_reply_s {
   uvmongo_reply_fields_t fields;
   char * objs;
 } uvmongo_reply_t;
+#pragma pack()
 
 uvmongo_t *
 uvmongo_new(char * hostname, int port);

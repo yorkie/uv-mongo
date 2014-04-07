@@ -159,6 +159,14 @@ uvmongo_message_serialize_insert(buffer_t * fullname, bson * obj) {
   return msg;
 }
 
+uvmongo_message_t *
+uvmongo_message_serialize_killCursors(uvmongo_t * m) {
+  /*
+   * TODO(Yorkie): Not Implementated
+   */
+  return NULL;
+};
+
 int
 uvmongo_message_send(uvmongo_t * m, uvmongo_message_t * message) {
   uvmongo_header_t header;

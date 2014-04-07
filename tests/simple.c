@@ -19,7 +19,7 @@ main(int argc, char ** argv) {
   bson query[1];
   bson_init(query);
   bson_finish(query);
-  uvmongo_find(accounts, query, NULL, 0, 20, find_cb);
+  uvmongo_find(accounts, query, NULL, 0, 2, find_cb);
   
   uv_run(uv_default_loop(), UV_RUN_DEFAULT);
   return 0;
