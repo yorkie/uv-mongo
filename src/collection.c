@@ -57,3 +57,36 @@ int
 uvmongo_find_one(uvmongo_collection_t * coll, bson * query, bson * fields, uvmongo_document_cb callback) {
   return uvmongo_find(coll, query, fields, 0, 1, callback);
 }
+
+int
+uvmongo_insert(uvmongo_collection_t * coll, bson * doc) {
+  uvmongo_message_t * msg = uvmongo_message_serialize_insert(coll->fullname, doc);
+  if (m->connected != UVMONGO_OK) {
+    list_rpush(m->ready_queue, list_node_new(msg));
+  } else {
+    uvmongo_message_send(m, msg);
+  }
+  return UVMONGO_OK;
+}
+
+int
+uvmongo_update(uvmongo_collection_t * coll, bson * selector, bson * setup) {
+  uvmongo_message_t * msg = uvmongo_message_serialize_update(coll->fullname, selector, setup, 0);
+  if (m->connected != UVMONGO_OK) {
+    list_rpush(m->ready_queue, list_node_new(msg));
+  } else {
+    uvmongo_message_send(m, msg);
+  }
+  return UVMONGO_OK;
+}
+
+int
+uvmongo_remove(uvmongo_collection_t * coll, bson * selector) {
+  uvmongo_message_t * msg = uvmongo_message_serialize_delete(coll->fullname, selector);
+  if (m->connected != UVMONGO_OK) {
+    list_rpush(m->ready_queue, list_node_new(msg));
+  } else {
+    uvmongo_message_send(m, msg);
+  }
+  return UVMONGO_OK;
+}
