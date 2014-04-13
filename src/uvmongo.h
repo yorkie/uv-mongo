@@ -111,6 +111,7 @@ typedef struct uvmongo_cursor_s {
   uvmongo_query_flags_t flag;
 } uvmongo_cursor_t;
 
+#pragma pack(1)
 /*
  * req_id: This is a client or database-generated identifier that uniquely identifies this message. 
  *         For the case of client-generated messages (e.g. OP_QUERY and OP_GET_MORE), it will be returned 
@@ -144,7 +145,6 @@ typedef struct uvmongo_message_s {
   char data;
 } uvmongo_message_t;
 
-#pragma pack(1)
 /*
  * replay response
  */

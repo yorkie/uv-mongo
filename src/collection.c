@@ -60,6 +60,7 @@ uvmongo_find_one(uvmongo_collection_t * coll, bson * query, bson * fields, uvmon
 
 int
 uvmongo_insert(uvmongo_collection_t * coll, bson * doc) {
+  uvmongo_t * m = coll->db->mongo;
   uvmongo_message_t * msg = uvmongo_message_serialize_insert(coll->fullname, doc);
   if (m->connected != UVMONGO_OK) {
     list_rpush(m->ready_queue, list_node_new(msg));
@@ -71,6 +72,7 @@ uvmongo_insert(uvmongo_collection_t * coll, bson * doc) {
 
 int
 uvmongo_update(uvmongo_collection_t * coll, bson * selector, bson * setup) {
+  uvmongo_t * m = coll->db->mongo;
   uvmongo_message_t * msg = uvmongo_message_serialize_update(coll->fullname, selector, setup, 0);
   if (m->connected != UVMONGO_OK) {
     list_rpush(m->ready_queue, list_node_new(msg));
@@ -82,6 +84,7 @@ uvmongo_update(uvmongo_collection_t * coll, bson * selector, bson * setup) {
 
 int
 uvmongo_remove(uvmongo_collection_t * coll, bson * selector) {
+  uvmongo_t * m = coll->db->mongo;
   uvmongo_message_t * msg = uvmongo_message_serialize_delete(coll->fullname, selector);
   if (m->connected != UVMONGO_OK) {
     list_rpush(m->ready_queue, list_node_new(msg));

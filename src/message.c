@@ -12,7 +12,7 @@ static const int ZERO = 0;
 static const int ONE = 1;
 
 uvmongo_message_t *
-uvmongo_message_new(size_t msglen , int req_id , int res_to , int opcode) {
+uvmongo_message_new(size_t msglen, int req_id, int res_to, int opcode) {
   uvmongo_message_t * message;
   if (msglen > INT32_MAX) {
     return NULL;
@@ -152,9 +152,24 @@ uvmongo_message_serialize_insert(buffer_t * fullname, bson * obj) {
   uvmongo_message_t * msg = uvmongo_message_new(msglen, 0, 0, OP_INSERT);
 
   data = &msg->data;
-  data = uvmongo_message_append32(data, &ONE);
+  data = uvmongo_message_append32(data, &ZERO);
   data = uvmongo_message_append(data, ns, nslen);
-  data = uvmongo_message_append(data, obj->data, bson_size(obj));
+  data = uvmongo_message_append(data, obj->data, bslen);
+  data = &msg->data;
+
+  int i;
+  printf("insert:\n");
+  for (i=0;i<bslen;i++) printf("%d,", obj->data[i]);
+  printf("\n");
+
+  printf("insert2:\n");
+  for (i=0;i<4+nslen+bslen;i++) printf("%d,", data[i]);
+  printf("\n");
+
+  printf("insert3:\n");
+  for (i=0;i<msglen-16;i++) printf("%d,", data[i]);
+  printf("\n");
+
   return msg;
 }
 
@@ -172,19 +187,28 @@ uvmongo_message_send(uvmongo_t * m, uvmongo_message_t * message) {
   int r, i = 0;
   int header_len;
 
+  char * data = &message->data;
+  printf("insert 555:\n");
+  for (i=0;i<80-16;i++) {
+    printf("%d,", data[i]);
+  }
+
   bson_little_endian32(&header.msglen, &message->header.msglen);
   bson_little_endian32(&header.req_id, &message->header.req_id);
   bson_little_endian32(&header.res_to, &message->header.res_to);
   bson_little_endian32(&header.opcode, &message->header.opcode);
 
   char buf[message->header.msglen];
-  header_len = sizeof(header);
+  header_len = sizeof(uvmongo_header_t);
   for (; i<header_len; i++) {
     buf[i] = ((char*)&header)[i];
   }
   for (; i<message->header.msglen; i++) {
     buf[i] = (&message->data)[i-header_len];
   }
+  printf("haha\n");
+  for (i=0;i<message->header.msglen;i++) printf("%d,", buf[i]);
+
 
   r = net_write2(m->net, buf, message->header.msglen);
   if (r != NET_OK) {
