@@ -44,7 +44,7 @@ typedef enum uvmongo_opcode_e {
  */
 typedef enum uvmongo_update_flags_e {
   Upsert = 0,
-  Multi  = 1
+  Multi  = 1 << 0
 } uvmongo_update_flags_t;
 
 /*
@@ -67,13 +67,13 @@ typedef enum uvmongo_del_flags_e {
  */
 typedef enum uvmongo_query_flags_e {
   Reserved        = 0,
-  TailableCursor  = 1,
-  SlaveOk         = 2,
-  OplogReplay     = 3,
-  NoCursorTimeout = 4,
-  AwaitData       = 5,
-  Exhaust         = 6,
-  Partial         = 7
+  TailableCursor  = 1 << 0,
+  SlaveOk         = 1 << 1,
+  OplogReplay     = 1 << 2,
+  NoCursorTimeout = 1 << 3,
+  AwaitData       = 1 << 4,
+  Exhaust         = 1 << 5,
+  Partial         = 1 << 6
 } uvmongo_query_flags_t;
 
 struct uvmongo_s {

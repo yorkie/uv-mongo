@@ -4,7 +4,7 @@ DEPS    = $(wildcard deps/*/*.c)
 CFLAGS  = -std=c99\
 					-Isrc\
 					-Ideps\
-					-Ideps/libuv\
+					-Ideps/libuv/include\
 					-I/usr/local/include/node\
 					-Wall -Wno-unused-function
 LDFLAGS = -lcrypto\
