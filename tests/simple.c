@@ -15,13 +15,8 @@ int
 main(int argc, char ** argv) {
   uvmongo_t * m = uvmongo_connect("localhost", 27017);
   uvmongo_db_t * mydb = uvmongo_db(m, "wave-api");
-  // uvmongo_collection_t * accounts = uvmongo_collection(mydb, "accounts");
-  // bson query[1];
-  // bson_init(query);
-  // bson_finish(query);
-  // uvmongo_find(accounts, query, NULL, 0, 0, find_cb);
-
   uvmongo_collection_t * test = uvmongo_collection(mydb, "test");
+  
   bson obj[1];
   bson_init(obj);
   bson_append_string(obj, "key", "hello world");

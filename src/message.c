@@ -17,9 +17,10 @@ uvmongo_message_new(size_t msglen, int req_id, int res_to, int opcode) {
     return NULL;
   }
 
-  // pointers size in uvmongo_message_t
+  /*
+   * pointers size in uvmongo_message_t
+   */
   size_t pt_size = sizeof(uvmongo_cursor_t *) + sizeof(uvmongo_document_cb);
-  
   message = (uvmongo_message_t *) bson_malloc(msglen + pt_size);
   if (!req_id) {
     req_id = rand();
@@ -254,8 +255,6 @@ uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
   /*
    * Handle Get more
    */
-  // printf("test:%d, %lld\n", reply->fields.num, reply->fields.cursorID);
-  // printf("limit:%d\n", message->cursor->limit);
   if (reply->fields.cursorID == 0 || reply->fields.num < message->cursor->limit) {
     uvmongo_cursor_free(message->cursor);
   } else {
