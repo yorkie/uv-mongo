@@ -33,10 +33,18 @@ uvmongo_gridfs_free(uvmongo_gridfs_t * fs) {
 }
 
 int
-uvmongo_gridfs_find(uvmongo_gridfs_t * fs, bson * query, 
-                                           uvmongo_document_cb callback, 
+uvmongo_gridfs_find(uvmongo_gridfs_t * fs, char * name,
+                                           uvmongo_document_cb callback,
                                            void * privdata) {
+
+  bson query[1];
+  bson_init(query);
+  if (name != NULL) {
+    bson_append_string(query, "filename", name);
+  }
+  bson_finish(query);
   uvmongo_find_one(uvmongo_collection(fs->db, fs->files_ns->data), query, NULL, callback, privdata);
+  bson_destroy(query);
   return UVMONGO_OK;
 }
 

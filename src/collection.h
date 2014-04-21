@@ -20,22 +20,24 @@ uvmongo_collection_free(uvmongo_collection_t * coll);
  * internal usage for find command
  */
 int
-uvmongo__find(uvmongo_collection_t * coll, bson * query, 
-                                           bson * fields, 
-                                           int skip, 
-                                           int limit, 
-                                           uvmongo_document_cb callback,
+uvmongo__find(uvmongo_collection_t * coll, bson * query,
+                                           bson * fields,
+                                           int skip,
+                                           int limit,
+                                           uvmongo_document_cb on_data,
+                                           uvmongo_response_cb on_drain,
                                            void * privdata);
 
 /*
  * find documents in a collection selected
  */
 int
-uvmongo_find(uvmongo_collection_t * coll, bson * query, 
-                                          bson * fields, 
-                                          int skip, 
-                                          int limit, 
-                                          uvmongo_document_cb callback,
+uvmongo_find(uvmongo_collection_t * coll, bson * query,
+                                          bson * fields,
+                                          int skip,
+                                          int limit,
+                                           uvmongo_document_cb on_data,
+                                           uvmongo_response_cb on_drain,
                                           void * privdata);
 
 /*

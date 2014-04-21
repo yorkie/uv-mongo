@@ -22,11 +22,12 @@ uvmongo_collection_free(uvmongo_collection_t * coll) {
 }
 
 int
-uvmongo__find(uvmongo_collection_t * coll, bson * query, 
-                                           bson * fields, 
-                                           int skip, 
-                                           int limit, 
-                                           uvmongo_document_cb callback, 
+uvmongo__find(uvmongo_collection_t * coll, bson * query,
+                                           bson * fields,
+                                           int skip,
+                                           int limit,
+                                           uvmongo_document_cb on_data,
+                                           uvmongo_response_cb on_drain,
                                            void * privdata) {
   uvmongo_cursor_t * cursor = uvmongo_cursor_new(coll);
   uvmongo_cursor_set_query(cursor, query, fields);
@@ -34,7 +35,7 @@ uvmongo__find(uvmongo_collection_t * coll, bson * query,
   uvmongo_cursor_set_limit(cursor, limit);
   
   uvmongo_message_t * msg = uvmongo_message_serialize_query(cursor);
-  uvmongo_message_set_callback(msg, callback, privdata);
+  uvmongo_message_set_callback(msg, on_data, on_drain, privdata);
   uvmongo_message_send(coll->db->mongo, msg);
   return UVMONGO_OK;
 }
@@ -44,7 +45,8 @@ uvmongo_find(uvmongo_collection_t * coll, bson * query,
                                           bson * fields, 
                                           int skip, 
                                           int limit, 
-                                          uvmongo_document_cb callback,
+                                          uvmongo_document_cb on_data,
+                                          uvmongo_response_cb on_drain,
                                           void * privdata) {
   uvmongo_t * m = coll->db->mongo;
   uvmongo_cursor_t * cursor = uvmongo_cursor_new(coll);
@@ -53,7 +55,7 @@ uvmongo_find(uvmongo_collection_t * coll, bson * query,
   uvmongo_cursor_set_limit(cursor, limit);
   
   uvmongo_message_t * msg = uvmongo_message_serialize_query(cursor);
-  uvmongo_message_set_callback(msg, callback, privdata);
+  uvmongo_message_set_callback(msg, on_data, on_drain, privdata);
 
   if (m->connected != UVMONGO_OK) {
     list_rpush(m->ready_queue, list_node_new(msg));
@@ -66,9 +68,9 @@ uvmongo_find(uvmongo_collection_t * coll, bson * query,
 int
 uvmongo_find_one(uvmongo_collection_t * coll, bson * query, 
                                               bson * fields, 
-                                              uvmongo_document_cb callback, 
+                                              uvmongo_document_cb callback,
                                               void * privdata) {
-  return uvmongo_find(coll, query, fields, 0, 1, callback, privdata);
+  return uvmongo_find(coll, query, fields, 0, 1, callback, NULL, privdata);
 }
 
 int

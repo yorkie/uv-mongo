@@ -20,7 +20,8 @@ uvmongo_message_free(uvmongo_message_t * msg);
  * set callback when this message is response
  */
 int
-uvmongo_message_set_callback(uvmongo_message_t * msg, uvmongo_document_cb callback, 
+uvmongo_message_set_callback(uvmongo_message_t * msg, uvmongo_document_cb on_data,
+                                                      uvmongo_response_cb on_drain, 
                                                       void * privdata);
 
 /*

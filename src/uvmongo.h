@@ -13,6 +13,7 @@
 typedef struct uvmongo_s uvmongo_t;
 typedef void (*uvmongo_connect_cb)  (uvmongo_t*);
 typedef void (*uvmongo_document_cb) (uvmongo_t*, bson*, void*);
+typedef void (*uvmongo_response_cb) (uvmongo_t*, void*);
 typedef void (*uvmongo_error_cb)    (uvmongo_t*, int);
 
 /*
@@ -140,7 +141,8 @@ typedef struct uvmongo_header_s {
  */
 typedef struct uvmongo_message_s {
   void * privdata;
-  uvmongo_document_cb callback;
+  uvmongo_document_cb on_data;
+  uvmongo_response_cb on_drain;
   uvmongo_cursor_t * cursor;
   uvmongo_header_t header;
   char data;

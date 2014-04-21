@@ -39,7 +39,7 @@ uvmongo_close(uvmongo_t * m) {
 int
 uvmongo_run_command(uvmongo_t * m, bson * cmd, uvmongo_document_cb callback) {
   uvmongo_collection_t * cmds = uvmongo_collection(uvmongo_db(m, "admin"), "$cmd");
-  uvmongo__find(cmds, cmd, NULL, 0, 1, callback, NULL);
+  uvmongo__find(cmds, cmd, NULL, 0, 1, callback, NULL, NULL);
   return UVMONGO_OK;
 }
 

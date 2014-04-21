@@ -20,7 +20,10 @@ uvmongo_message_new(size_t msglen, int req_id, int res_to, int opcode) {
   /*
    * pointers size in uvmongo_message_t
    */
-  size_t pt_size = sizeof(uvmongo_cursor_t *) + sizeof(uvmongo_document_cb) + sizeof(void*);
+  size_t pt_size = sizeof(uvmongo_cursor_t *) 
+                 + sizeof(uvmongo_document_cb)
+                 + sizeof(uvmongo_response_cb)
+                 + sizeof(void*);
   message = (uvmongo_message_t *) bson_malloc(msglen + pt_size);
   if (!req_id) {
     req_id = rand();
@@ -41,9 +44,11 @@ uvmongo_message_free(uvmongo_message_t * msg) {
 }
  
 int
-uvmongo_message_set_callback(uvmongo_message_t * msg, uvmongo_document_cb callback, 
+uvmongo_message_set_callback(uvmongo_message_t * msg, uvmongo_document_cb on_data,
+                                                      uvmongo_response_cb on_drain,
                                                       void * privdata) {
-  msg->callback = callback;
+  msg->on_data = on_data;
+  msg->on_drain = on_drain;
   msg->privdata = privdata;
   return UVMONGO_OK;
 }
@@ -89,6 +94,7 @@ uvmongo_message_serialize_query(uvmongo_cursor_t * cursor) {
  
   assert(data == ((char*)msg) + sizeof(uvmongo_cursor_t*)
                               + sizeof(uvmongo_document_cb)
+                              + sizeof(uvmongo_response_cb)
                               + sizeof(void*)
                               + msg->header.msglen);
   return msg;
@@ -249,7 +255,7 @@ uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
     if (!res) {
       break;
     }
-    message->callback(m, res, message->privdata);
+    message->on_data(m, res, message->privdata);
     next += bson_size(res);
     if (next >= reply->header.msglen - 36) {
       break;
@@ -260,6 +266,13 @@ uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
    * Handle Get more
    */
   if (reply->fields.cursorID == 0 || reply->fields.num < message->cursor->limit) {
+    /*
+     * Here, we could call `response_cb` to notify user-land this response
+     * has been ended.
+     */
+    if (message->on_drain) {
+      message->on_drain(m, message->privdata);
+    }
     uvmongo_cursor_free(message->cursor);
   } else {
     uvmongo_cursor_t * cursor = uvmongo_cursor_new(message->cursor->coll);
@@ -267,7 +280,7 @@ uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
     uvmongo_cursor_set_limit(cursor, message->cursor->limit);
     uvmongo_message_t * new_msg = uvmongo_message_serialize_more(cursor);
     new_msg->cursor = cursor;
-    uvmongo_message_set_callback(new_msg, message->callback, message->privdata);
+    uvmongo_message_set_callback(new_msg, message->on_data, message->on_drain, message->privdata);
     uvmongo_message_send(m, new_msg);
   }
  
