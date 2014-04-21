@@ -39,7 +39,7 @@ uvmongo_close(uvmongo_t * m) {
 int
 uvmongo_run_command(uvmongo_t * m, bson * cmd, uvmongo_document_cb callback) {
   uvmongo_collection_t * cmds = uvmongo_collection(uvmongo_db(m, "admin"), "$cmd");
-  uvmongo__find(cmds, cmd, NULL, 0, 1, callback);
+  uvmongo__find(cmds, cmd, NULL, 0, 1, callback, NULL);
   return UVMONGO_OK;
 }
 
@@ -55,7 +55,7 @@ uvmongo_checkmaster(uvmongo_t * m) {
 }
 
 void
-uvmongo_checkmaster_cb(uvmongo_t * m, bson * res) {
+uvmongo_checkmaster_cb(uvmongo_t * m, bson * res, void * privdata) {
   bson_iterator it;
   char *key;
   bson_iterator_from_buffer(&it, res->data);

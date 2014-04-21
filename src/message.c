@@ -20,7 +20,7 @@ uvmongo_message_new(size_t msglen, int req_id, int res_to, int opcode) {
   /*
    * pointers size in uvmongo_message_t
    */
-  size_t pt_size = sizeof(uvmongo_cursor_t *) + sizeof(uvmongo_document_cb);
+  size_t pt_size = sizeof(uvmongo_cursor_t *) + sizeof(uvmongo_document_cb) + sizeof(void*);
   message = (uvmongo_message_t *) bson_malloc(msglen + pt_size);
   if (!req_id) {
     req_id = rand();
@@ -41,8 +41,10 @@ uvmongo_message_free(uvmongo_message_t * msg) {
 }
  
 int
-uvmongo_message_set_callback(uvmongo_message_t * msg, uvmongo_document_cb callback) {
+uvmongo_message_set_callback(uvmongo_message_t * msg, uvmongo_document_cb callback, 
+                                                      void * privdata) {
   msg->callback = callback;
+  msg->privdata = privdata;
   return UVMONGO_OK;
 }
  
@@ -72,6 +74,7 @@ uvmongo_message_serialize_query(uvmongo_cursor_t * cursor) {
   size_t bslen = bson_size(cursor->query) + bson_size(cursor->fields);
   size_t msglen = 16 + 4 + nslen + 4 + 4 + bslen;
   uvmongo_message_t * msg = uvmongo_message_new(msglen, 0, 0, OP_QUERY);
+  msg->privdata = NULL;
   msg->cursor = cursor;
  
   data = &msg->data;
@@ -85,7 +88,8 @@ uvmongo_message_serialize_query(uvmongo_cursor_t * cursor) {
   }
  
   assert(data == ((char*)msg) + sizeof(uvmongo_cursor_t*)
-                              + sizeof(uvmongo_document_cb) 
+                              + sizeof(uvmongo_document_cb)
+                              + sizeof(void*)
                               + msg->header.msglen);
   return msg;
 }
@@ -245,7 +249,7 @@ uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
     if (!res) {
       break;
     }
-    message->callback(m, res);
+    message->callback(m, res, message->privdata);
     next += bson_size(res);
     if (next >= reply->header.msglen - 36) {
       break;
@@ -263,7 +267,7 @@ uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
     uvmongo_cursor_set_limit(cursor, message->cursor->limit);
     uvmongo_message_t * new_msg = uvmongo_message_serialize_more(cursor);
     new_msg->cursor = cursor;
-    uvmongo_message_set_callback(new_msg, message->callback);
+    uvmongo_message_set_callback(new_msg, message->callback, message->privdata);
     uvmongo_message_send(m, new_msg);
   }
  

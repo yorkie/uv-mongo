@@ -24,7 +24,8 @@ uvmongo__find(uvmongo_collection_t * coll, bson * query,
                                            bson * fields, 
                                            int skip, 
                                            int limit, 
-                                           uvmongo_document_cb callback);
+                                           uvmongo_document_cb callback,
+                                           void * privdata);
 
 /*
  * find documents in a collection selected
@@ -34,7 +35,8 @@ uvmongo_find(uvmongo_collection_t * coll, bson * query,
                                           bson * fields, 
                                           int skip, 
                                           int limit, 
-                                          uvmongo_document_cb callback);
+                                          uvmongo_document_cb callback,
+                                          void * privdata);
 
 /*
  * find one document in a collection selected
@@ -42,7 +44,8 @@ uvmongo_find(uvmongo_collection_t * coll, bson * query,
 int
 uvmongo_find_one(uvmongo_collection_t * coll, bson * query, 
                                               bson * fields, 
-                                              uvmongo_document_cb callback);
+                                              uvmongo_document_cb callback,
+                                              void * privdata);
 
 /*
  * inserts document

@@ -14,11 +14,6 @@ chunk_new(bson_oid_t id, int num, char * src, size_t src_size) {
   return ret;
 }
 
-static void
-files_cb(uvmongo_t * m, bson * res) {
-  bson_print(res);
-}
-
 uvmongo_gridfs_t *
 uvmongo_gridfs_new(uvmongo_db_t * db, char * name) {
   uvmongo_gridfs_t * fs = (uvmongo_gridfs_t *) malloc(sizeof(uvmongo_gridfs_t));
@@ -38,8 +33,10 @@ uvmongo_gridfs_free(uvmongo_gridfs_t * fs) {
 }
 
 int
-uvmongo_gridfs_find(uvmongo_gridfs_t * fs, bson * query) {
-  uvmongo_find_one(uvmongo_collection(fs->db, fs->files_ns->data), query, NULL, files_cb);
+uvmongo_gridfs_find(uvmongo_gridfs_t * fs, bson * query, 
+                                           uvmongo_document_cb callback, 
+                                           void * privdata) {
+  uvmongo_find_one(uvmongo_collection(fs->db, fs->files_ns->data), query, NULL, callback, privdata);
   return UVMONGO_OK;
 }
 

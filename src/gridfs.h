@@ -27,7 +27,9 @@ int
 uvmongo_gridfs_free(uvmongo_gridfs_t * fs);
 
 int
-uvmongo_gridfs_find(uvmongo_gridfs_t * fs, bson * query);
+uvmongo_gridfs_find(uvmongo_gridfs_t * fs, bson * query, 
+                                           uvmongo_document_cb callback, 
+                                           void * privdata);
 
 int
 uvmongo_gridfs_save(uvmongo_gridfs_t * fs, const char * filename, 
