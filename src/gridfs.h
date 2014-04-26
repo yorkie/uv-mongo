@@ -7,7 +7,7 @@
 #define DEFAULT_CHUNK_SIZE 256*1024
 
 typedef struct uvmongo_gridfs_s uvmongo_gridfs_t;
-typedef struct uvmongo_gridfile_s uvmongo_gridfile_t;
+typedef struct uvmongo_gridfs_packet_s uvmongo_gridfs_packet_t;
 
 typedef enum uvmongo_storage_type_e {
   GRIDFILE_DEFAULT = 0,
@@ -18,6 +18,12 @@ struct uvmongo_gridfs_s {
   uvmongo_db_t * db;
   buffer_t * files_ns;
   buffer_t * chunks_ns;
+};
+
+struct uvmongo_gridfs_packet_s {
+  uvmongo_gridfs_t * fs;
+  buffer_t * data;
+  void * privdata;
 };
 
 uvmongo_gridfs_t *

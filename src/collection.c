@@ -24,13 +24,14 @@ uvmongo_collection_free(uvmongo_collection_t * coll) {
 int
 uvmongo__find(uvmongo_collection_t * coll, bson * query,
                                            bson * fields,
+                                           bson * special,
                                            int skip,
                                            int limit,
                                            uvmongo_document_cb on_data,
                                            uvmongo_response_cb on_drain,
                                            void * privdata) {
   uvmongo_cursor_t * cursor = uvmongo_cursor_new(coll);
-  uvmongo_cursor_set_query(cursor, query, fields);
+  uvmongo_cursor_set_query(cursor, query, fields, special);
   uvmongo_cursor_set_skip(cursor, skip);
   uvmongo_cursor_set_limit(cursor, limit);
   
@@ -41,16 +42,17 @@ uvmongo__find(uvmongo_collection_t * coll, bson * query,
 }
 
 int
-uvmongo_find(uvmongo_collection_t * coll, bson * query, 
-                                          bson * fields, 
-                                          int skip, 
-                                          int limit, 
+uvmongo_find(uvmongo_collection_t * coll, bson * query,
+                                          bson * fields,
+                                          bson * special,
+                                          int skip,
+                                          int limit,
                                           uvmongo_document_cb on_data,
                                           uvmongo_response_cb on_drain,
                                           void * privdata) {
   uvmongo_t * m = coll->db->mongo;
   uvmongo_cursor_t * cursor = uvmongo_cursor_new(coll);
-  uvmongo_cursor_set_query(cursor, query, fields);
+  uvmongo_cursor_set_query(cursor, query, fields, special);
   uvmongo_cursor_set_skip(cursor, skip);
   uvmongo_cursor_set_limit(cursor, limit);
   
@@ -66,11 +68,12 @@ uvmongo_find(uvmongo_collection_t * coll, bson * query,
 }
 
 int
-uvmongo_find_one(uvmongo_collection_t * coll, bson * query, 
-                                              bson * fields, 
+uvmongo_find_one(uvmongo_collection_t * coll, bson * query,
+                                              bson * fields,
+                                              bson * special,
                                               uvmongo_document_cb callback,
                                               void * privdata) {
-  return uvmongo_find(coll, query, fields, 0, 1, callback, NULL, privdata);
+  return uvmongo_find(coll, query, fields, special, 0, 1, callback, NULL, privdata);
 }
 
 int

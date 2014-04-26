@@ -1,10 +1,10 @@
 
+#include <assert.h>
 #include "gridfs.h"
 #include "collection.h"
 
 static bson *
 chunk_new(bson_oid_t id, int num, char * src, size_t src_size) {
-  fprintf(stdout, "buf:%s\n", src);
   bson * ret = bson_alloc();
   bson_init_size(ret, (int)src_size + 128);
   bson_append_oid(ret, "files_id", &id);
@@ -12,6 +12,46 @@ chunk_new(bson_oid_t id, int num, char * src, size_t src_size) {
   bson_append_binary(ret, "data", BSON_BIN_BINARY, src, (int)src_size);
   bson_finish(ret);
   return ret;
+}
+
+static void
+uvmongo_chunks_data_cb(uvmongo_t * m, bson * chunk, void * privdata) {
+  bson_print(chunk);
+}
+
+static void
+uvmongo_chunks_drain_cb(uvmongo_t * m, void * privdata) {
+
+}
+
+static void
+uvmongo_files_cb(uvmongo_t * m, bson * res, void * privdata) {
+  uvmongo_gridfs_packet_t * packet;
+  uvmongo_collection_t * chunks;
+  bson query[1];
+  bson_iterator it[1];
+  bson_oid_t * fileId = NULL;
+
+  packet = (uvmongo_gridfs_packet_t *) privdata;
+  chunks = uvmongo_collection(packet->fs->db, packet->fs->chunks_ns->data);
+
+  bson_iterator_init(it, res);
+  while (bson_iterator_next(it) != BSON_EOO) {
+    const char * key = bson_iterator_key(it);
+    if (strcmp(key, "_id") == 0) {
+      fileId = bson_iterator_oid(it);
+      break;
+    }
+  }
+
+  assert(fileId != NULL);
+
+  bson_init(query);
+  bson_append_oid(query, "files_id", fileId);
+  bson_finish(query);
+  uvmongo_find(chunks, query, NULL, 0, 0, uvmongo_chunks_data_cb, 
+                                          uvmongo_chunks_drain_cb, 
+                                          privdata);
 }
 
 uvmongo_gridfs_t *
@@ -38,12 +78,20 @@ uvmongo_gridfs_find(uvmongo_gridfs_t * fs, char * name,
                                            void * privdata) {
 
   bson query[1];
+  uvmongo_collection_t * files;
+  uvmongo_gridfs_packet_t * packet;
+  files = uvmongo_collection(fs->db, fs->files_ns->data);
+  packet = (uvmongo_gridfs_packet_t *) malloc(sizeof(uvmongo_gridfs_packet_t));
+  packet->fs = fs;
+  packet->data = buffer_new();
+  packet->privdata = privdata;
+
   bson_init(query);
   if (name != NULL) {
     bson_append_string(query, "filename", name);
   }
   bson_finish(query);
-  uvmongo_find_one(uvmongo_collection(fs->db, fs->files_ns->data), query, NULL, callback, privdata);
+  uvmongo_find_one(files, query, NULL, uvmongo_files_cb, packet);
   bson_destroy(query);
   return UVMONGO_OK;
 }

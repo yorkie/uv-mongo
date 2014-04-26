@@ -22,6 +22,7 @@ uvmongo_collection_free(uvmongo_collection_t * coll);
 int
 uvmongo__find(uvmongo_collection_t * coll, bson * query,
                                            bson * fields,
+                                           bson * special,
                                            int skip,
                                            int limit,
                                            uvmongo_document_cb on_data,
@@ -34,18 +35,20 @@ uvmongo__find(uvmongo_collection_t * coll, bson * query,
 int
 uvmongo_find(uvmongo_collection_t * coll, bson * query,
                                           bson * fields,
+                                          bson * special,
                                           int skip,
                                           int limit,
-                                           uvmongo_document_cb on_data,
-                                           uvmongo_response_cb on_drain,
+                                          uvmongo_document_cb on_data,
+                                          uvmongo_response_cb on_drain,
                                           void * privdata);
 
 /*
  * find one document in a collection selected
  */
 int
-uvmongo_find_one(uvmongo_collection_t * coll, bson * query, 
-                                              bson * fields, 
+uvmongo_find_one(uvmongo_collection_t * coll, bson * query,
+                                              bson * fields,
+                                              bson * special,
                                               uvmongo_document_cb callback,
                                               void * privdata);
 

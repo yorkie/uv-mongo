@@ -255,7 +255,9 @@ uvmongo_message_read(uvmongo_t * m, char * msg, size_t buflen) {
     if (!res) {
       break;
     }
-    message->on_data(m, res, message->privdata);
+    if (message->on_data) {
+      message->on_data(m, res, message->privdata);
+    }
     next += bson_size(res);
     if (next >= reply->header.msglen - 36) {
       break;

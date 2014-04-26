@@ -11,7 +11,7 @@ int
 uvmongo_cursor_set_id(uvmongo_cursor_t * cursor, int64_t id);
 
 int
-uvmongo_cursor_set_query(uvmongo_cursor_t * cursor, bson * query, bson * fields);
+uvmongo_cursor_set_query(uvmongo_cursor_t * cursor, bson * query, bson * fields, bson * special);
 
 int
 uvmongo_cursor_set_skip(uvmongo_cursor_t * cursor, unsigned int skip);
