@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Uv-mongo by yorkie</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Uv-mongo</h1>
+          <h2>async mongo library based on libuv and clibs</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/yorkie/uv-mongo/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/yorkie/uv-mongo/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/yorkie/uv-mongo" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a name="uv-mongo" class="anchor" href="#uv-mongo"><span class="octicon octicon-link"></span></a>uv mongo</h1>
+
+<p>Async mongo library based on <a href="https://github.com/joyent/libuv">libuv</a> and <a href="https://github.com/clibs">clibs</a></p>
+
+<h3>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h3>
+
+<div class="highlight highlight-c"><pre><span class="kt">void</span>
+<span class="nf">find_cb</span><span class="p">(</span><span class="kt">uvmongo_t</span> <span class="o">*</span> <span class="n">m</span><span class="p">,</span> <span class="n">bson</span> <span class="o">*</span> <span class="n">res</span><span class="p">)</span> <span class="p">{</span>
+  <span class="n">bson_print</span><span class="p">(</span><span class="n">res</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span>
+<span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span> <span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kt">uvmongo_t</span> <span class="o">*</span> <span class="n">m</span> <span class="o">=</span> <span class="n">uvmongo_connect</span><span class="p">(</span><span class="s">"localhost"</span><span class="p">,</span> <span class="mi">27017</span><span class="p">);</span>
+  <span class="kt">uvmongo_db_t</span> <span class="o">*</span> <span class="n">mydb</span> <span class="o">=</span> <span class="n">uvmongo_db</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s">"mydb"</span><span class="p">);</span>
+  <span class="kt">uvmongo_collection_t</span> <span class="o">*</span> <span class="n">accounts</span> <span class="o">=</span> <span class="n">uvmongo_collection</span><span class="p">(</span><span class="n">mydb</span><span class="p">,</span> <span class="s">"blogs"</span><span class="p">);</span>
+
+  <span class="n">bson</span> <span class="n">selector</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+  <span class="n">bson_init</span><span class="p">(</span><span class="n">selector</span><span class="p">);</span>
+  <span class="n">bson_append_string</span><span class="p">(</span><span class="n">selector</span><span class="p">,</span> <span class="s">"user"</span><span class="p">,</span> <span class="s">"yorkie"</span><span class="p">);</span>
+  <span class="n">bson_finish</span><span class="p">(</span><span class="n">selector</span><span class="p">);</span>
+  <span class="n">uvmongo_find_one</span><span class="p">(</span><span class="n">accounts</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="n">find_cb</span><span class="p">);</span>
+  <span class="n">uv_run</span><span class="p">(</span><span class="n">uv_default_loop</span><span class="p">(),</span> <span class="n">UV_RUN_DEFAULT</span><span class="p">);</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="api" class="anchor" href="#api"><span class="octicon octicon-link"></span></a>API</h3>
+
+<h5>
+<a name="uvmongo_connectchar--hostname-int-port" class="anchor" href="#uvmongo_connectchar--hostname-int-port"><span class="octicon octicon-link"></span></a>uvmongo_connect(char * hostname, int port);</h5>
+
+<p>create a connection to your mongoDB</p>
+
+<h5>
+<a name="uvmongo_closeuvmongo_t--m" class="anchor" href="#uvmongo_closeuvmongo_t--m"><span class="octicon octicon-link"></span></a>uvmongo_close(uvmongo_t * m);</h5>
+
+<p>close this connection to your mongoDB</p>
+
+<h5>
+<a name="uvmongo_dbuvmongo_t--m-char--name" class="anchor" href="#uvmongo_dbuvmongo_t--m-char--name"><span class="octicon octicon-link"></span></a>uvmongo_db(uvmongo_t * m, char * name);</h5>
+
+<p>select db in your mongoDB</p>
+
+<h5>
+<a name="uvmongo_collectionuvmongo_db_t--db-char--name" class="anchor" href="#uvmongo_collectionuvmongo_db_t--db-char--name"><span class="octicon octicon-link"></span></a>uvmongo_collection(uvmongo_db_t * db, char * name);</h5>
+
+<p>select collection of a db</p>
+
+<h5>
+<a name="uvmongo_finduvmongo_collection_t--coll-bson--selector-bson--fields-int-skip-int-limit-void--callback" class="anchor" href="#uvmongo_finduvmongo_collection_t--coll-bson--selector-bson--fields-int-skip-int-limit-void--callback"><span class="octicon octicon-link"></span></a>uvmongo_find(uvmongo_collection_t * coll, bson * selector, bson * fields, int skip, int limit, void * callback);</h5>
+
+<p>query documents</p>
+
+<h5>
+<a name="uvmongo_find_oneuvmongo_collection_t--coll-bson--selector-bson--fields-void--callback" class="anchor" href="#uvmongo_find_oneuvmongo_collection_t--coll-bson--selector-bson--fields-void--callback"><span class="octicon octicon-link"></span></a>uvmongo_find_one(uvmongo_collection_t * coll, bson * selector, bson * fields, void * callback);</h5>
+
+<p>query one document</p>
+
+<h3>
+<a name="run-tests" class="anchor" href="#run-tests"><span class="octicon octicon-link"></span></a>Run tests</h3>
+
+<div class="highlight highlight-sh"><pre><span class="nv">$ </span>make <span class="nb">test</span>
+</pre></div>
+
+<h3>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h3>
+
+<p>MIT</p>
+        </section>
+
+        <footer>
+          Uv-mongo is maintained by <a href="https://github.com/yorkie">yorkie</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
